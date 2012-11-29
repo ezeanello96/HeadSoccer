@@ -22,7 +22,7 @@ class HeadSoccer:
 if __name__ == '__main__':
     '''El juego será ejecutado solo si se abre este achivo, al ser llamado por otro habrá que ejecutar la clase:
     
-    >>> import pong
-    >>> pong.Pong()
+    >>> import HeadSoccer
+    >>> HeadSoccer.HeadSoccer()
     '''
     HeadSoccer()
