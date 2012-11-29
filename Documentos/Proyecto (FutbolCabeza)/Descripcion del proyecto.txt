@@ -1,0 +1,3 @@
+Integrantes del grupo: Emiliano Monaco y Ezequiel Anello
+Nombre de nuestro proyecto: lo llamamos de dos maneras Futbol Cabeza o Head Soccer
+Descripcion: Nosotros nos basamos en un juego que esta en la web y viene para smartphones que se llama HeadSoccer y quisimos llevarlo a Python mediante el uso de pilas. Se basa en dos jugadores que golpean una pelota y el primero que llega a meter 7 goles gana.
