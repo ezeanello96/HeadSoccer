@@ -1,0 +1,142 @@
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import pilas
+from jugador_1 import Jugador_1
+from jugador_2 import Jugador_2
+from futbol import *
+from puntajes import *
+
+
+class EscenaJuego(pilas.escenas.Escena):
+    '''Representa a la escena que se desarrolla en la ejecucion del juego'''
+
+    def __init__(self):
+        pilas.escenas.Escena.__init__(self)
+        self.crear_escenario()
+        self.crear_colisiones()
+        pilas.eventos.pulsa_tecla_escape.conectar(self.cuando_pulsa_tecla)
+        self.termino_el_juego = False
+        self.GolArcoIzq = False
+        self.GolArcoDer = False
+        pilas.eventos.actualizar.conectar(self.Gol)
+
+    def crear_escenario(self):
+        self.fondo = pilas.fondos.Fondo('Fondo/fondo_juego.png')
+        self.fondo.escala = 0.56
+        """Agregamos la pelota para el juego en este caso la Bomba previamente modificada"""
+        self.pelota = Pelota()
+        self.pelota.aprender(pilas.habilidades.Arrastrable)
+        self.pelota.escala = 0.5
+        self.puntaje1 = Puntaje1()
+        self.puntaje2 = Puntaje2()
+        """Ponemos a los jugadores en el escenario"""
+        self.Jugador1 = Jugador_1(-290, 0)
+        self.Jugador2 = Jugador_2(290, 0)
+        """Creamos a los arcos pero sin los palos"""
+        imagen1 = pilas.imagenes.cargar('Fondo/arcoder.png')
+        imagen2 = pilas.imagenes.cargar('Fondo/arcoizq.png')
+        """Hacemos los palos para que rebote cada vez que toca a cada uno"""
+        imagenpalo1 = pilas.imagenes.cargar('Fondo/PaloArriba(arcoder).png')
+        imagenpalo2 = pilas.imagenes.cargar('Fondo/PaloAbajo(arcoder).png')
+        imagenpalo3 = pilas.imagenes.cargar('Fondo/PaloArriba(arcoizq).png')
+        imagenpalo4 = pilas.imagenes.cargar('Fondo/PaloAbajo(arcoizq).png')
+        """Les ponemos su imagen a cada palo y arcos"""
+        self.PaloArribaDer = pilas.actores.Actor(imagenpalo1)
+        self.PaloAbajoDer = pilas.actores.Actor(imagenpalo2)
+        self.PaloArribaIzq = pilas.actores.Actor(imagenpalo3)
+        self.PaloAbajoIzq = pilas.actores.Actor(imagenpalo4)       
+        self.arcoder = pilas.actores.Actor(imagen1)
+        self.arcoizq = pilas.actores.Actor(imagen2)
+        """Ubicamos a los palos en el escenario"""
+        self.PaloArribaDer.x = 304
+        self.PaloArribaDer.y = 54
+        self.PaloAbajoDer.x = 304
+        self.PaloAbajoDer.y = -55
+        self.PaloArribaIzq.x = -304
+        self.PaloArribaIzq.y = 54
+        self.PaloAbajoIzq.x = -304
+        self.PaloAbajoIzq.y = -55
+        """Le cambiamos el radio de colision"""
+        self.PaloArribaDer.radio_de_colision = 0.7
+        self.PaloAbajoDer.radio_de_colision = 0.7
+        self.PaloArribaIzq.radio_de_colision = 0.7
+        self.PaloAbajoIzq.radio_de_colision = 0.7
+        """Metemos a los palos dentro de mismos grupos para luego poder hacer las colisiones"""
+        self.PalosDer = [self.PaloAbajoDer, self.PaloArribaDer]
+        self.PalosIzq = [self.PaloAbajoIzq, self.PaloArribaIzq]
+        self.arcoder.x = 304
+        self.arcoizq.x = -304
+        self.arcoder.radio_de_colision = 0
+        self.arcoizq.radio_de_colision = 0
+        pilas.avisar(u'Ganará el primero en llegar a 7 goles, ESC para salir')
+     
+    def Gol(self, evento):
+
+        if not self.termino_el_juego:
+            if not self.GolArcoDer:
+                if (self.pelota.x >= 290):
+                    if (self.pelota.y < 40 and self.pelota.y > -44):
+                        a = int(self.puntaje1.obtener_texto())    
+                        if (a != 6):
+                            self.puntaje1.definir_texto(str(a+1))
+                        else:
+                            self.puntaje1.definir_texto(str(a+1))
+                            self.pelota.explotar()
+                            pilas.avisar('Ganador: jugador 1')
+                            texto = pilas.actores.Texto('Game Over !!!')
+                            self.puntaje1.color = pilas.colores.verde
+                            self.puntaje2.color = pilas.colores.rojo
+                            self.termino_el_juego = True
+                        self.GolArcoDer = True
+                    if self.GolArcoDer:
+                        if (self.pelota.x < 290):
+                            self.GolArcoDer = False
+            if self.GolArcoDer:
+                if self.pelota.x < 290:
+                    self.GolArcoDer = False
+            if not self.GolArcoIzq:
+                if (self.pelota.x <= -290):
+                    if (self.pelota.y < 54 and self.pelota.y > -55):
+                        a = int(self.puntaje2.obtener_texto())    
+                        if (a != 6):
+                            self.puntaje2.definir_texto(str(a+1))
+                        else:
+                            self.puntaje2.definir_texto(str(a+1))
+                            self.pelota.explotar()
+                            pilas.avisar('Ganador: jugador 2')
+                            texto = pilas.actores.Texto('Game Over !!!')
+                            self.puntaje2.color = pilas.colores.verde
+                            self.puntaje1.color = pilas.colores.rojo
+                            self.termino_el_juego = True
+                        self.GolArcoIzq = True
+            if self.GolArcoIzq:
+                if self.pelota.x > -290:
+                    self.GolArcoIzq = False
+
+   
+    def crear_colisiones(self):
+        def cuando_colisionan_1(pelota, jugador):
+            pelota.x += 0.5
+            pelota.circulo.impulsar(pelota.dx * 50000, pelota.dy * 50000)
+            
+        def cuando_colisionan_2(pelota, jugador):
+            pelota.x -= 0.5
+            pelota.circulo.impulsar(pelota.dx * -50000, pelota.dy * -50000)
+        
+        def cuando_colisionan_3(pelota, palos):
+            pelota.x -= 1
+            pelota.circulo.impulsar(pelota.dx * 50000, pelota.dy * 0)
+
+        def cuando_colisionan_4(pelota, palos):
+            pelota.x += 1
+            pelota.circulo.impulsar(pelota.dx * -50000, pelota.dy * 0)
+
+        pilas.mundo.colisiones.agregar(self.pelota, self.Jugador1, cuando_colisionan_1)
+        pilas.mundo.colisiones.agregar(self.pelota, self.Jugador2, cuando_colisionan_2)
+        pilas.mundo.colisiones.agregar(self.pelota, self.PalosDer, cuando_colisionan_3)
+        pilas.mundo.colisiones.agregar(self.pelota, self.PalosIzq, cuando_colisionan_4)            
+
+    def cuando_pulsa_tecla(self, *k, **kv):
+        import escena_menu
+        escena_menu.EscenaMenu()

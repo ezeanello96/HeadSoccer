@@ -1,0 +1,11 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import pilas
+import escena_menu
+
+pilas.iniciar(titulo='Head Soccer', gravedad=(90, 0))
+
+escena_menu.EscenaMenu()
+
+pilas.ejecutar()
